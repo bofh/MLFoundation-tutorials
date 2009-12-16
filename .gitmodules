@@ -1,0 +1,3 @@
+[submodule "MLFoundation"]
+	path = MLFoundation
+	url = git://github.com/bofh/MLFoundation.git
