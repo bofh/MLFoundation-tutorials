@@ -2,12 +2,6 @@
 import sys
 
 env = Environment()
-
-# TODO Build script (and probably sources) need to be updated to build against
-# newer versions of gcc and gnustep-base.
-EXTRAFLAGS="-D_NATIVE_OBJC_EXCEPTIONS `gnustep-config --objc-flags`"
-env.Append(CCFLAGS=EXTRAFLAGS, OBJCFLAGS=EXTRAFLAGS)
-
 env.SetupCommandLineDebug()
 env.SetupTCMalloc()
 env.SetupMLFoundation()
