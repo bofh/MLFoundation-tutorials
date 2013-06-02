@@ -35,7 +35,7 @@ static NSString * const kStorageLocation = @"/tmp/KeyValueStorage.db";
 - (id)objectForKey:(id)aKey
 {
 	MLAssert(storage_);
-	return [storage_ objectForKey: aKey];
+	return [storage_ objectForKey:aKey];
 }
 
 - (void)setObject:(id)anObject forKey:(id < NSCopying >)aKey
@@ -48,7 +48,7 @@ static NSString * const kStorageLocation = @"/tmp/KeyValueStorage.db";
 - (void)save
 {
 	MLAssert(storage_);
-	[storage_ writeToFile:kStorageLocation atomically: YES];
+	[storage_ writeToFile:kStorageLocation atomically:YES];
 }
 
 @end

@@ -10,6 +10,7 @@
 
 	if (self) {
 		dataProvider_ = [[KeyValueServer alloc] init];
+		MLReleaseSelfAndReturnNilUnless(dataProvider_);
 	}
 
 	return self;
