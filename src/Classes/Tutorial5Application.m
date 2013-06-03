@@ -24,6 +24,7 @@
 
 		[acceptor_ setLoop:EVReactor];
 		[acceptor_ setDelegate:self];
+		[acceptor_ setPort:1234];
 
 		dataProvider_ = [[KeyValueServer alloc] init];
 		MLReleaseSelfAndReturnNilUnless(dataProvider_);
@@ -50,7 +51,7 @@
 	printf("    %s [options]\n", [[[[NSProcessInfo processInfo] arguments] objectAtIndex:0] UTF8String]);
 	printf("\n");
 	printf("TCP options:\n");
-	printf("  --port <port>               Listen at port <port>\n");
+	printf("  --port <port>               Listen at port <port> (default 1234).\n");
 	printf("\n");
 
 	[super usage];

@@ -24,6 +24,9 @@
 		commandType_ = kCommandUnknown;
 		key_ = nil;
 		val_ = nil;
+		
+		[clientConnection_ setHost:@"127.0.0.1"];
+		[clientConnection_ setPort:1234];
 	}
 
 	return self;
@@ -193,13 +196,13 @@
 	printf("Usage:\n");
 	printf("    %s [options]\n", [[[[NSProcessInfo processInfo] arguments] objectAtIndex:0] UTF8String]);
 	printf("\n");
-	printf("TCP options:\n");
-	printf("  --host <host>               Connect to host <host>.\n");
-	printf("  --port <port>               Connect to port <port>.\n");
-	printf("\n");
 	printf("Request commands:\n");
-	printf("  --set <key> --val <val>     Store <key>-<val> pair in store.\n");
+	printf("  --set <key> --val <val>     Store <key> <val> pair in remote storage.\n");
 	printf("  --get <key>                 Retrieve value for the specified <key>.\n");
+	printf("\n");
+	printf("TCP options:\n");
+	printf("  --host <host>               Connect to host <host> (default 127.0.0.1).\n");
+	printf("  --port <port>               Connect to port <port> (default 1234).\n");
 	printf("\n");
 	
 	[super usage];
