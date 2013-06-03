@@ -14,3 +14,16 @@ void MLStreamAppendNSString(id< MLStream > stream, NSString *data)
 	
 	free(mutableData);
 }
+
+NSDictionary *MLStreamReadJSON(id< MLStream > stream)
+{
+	uint8_t *data = MLStreamData(stream);
+	uint64_t len = MLStreamLength(stream);
+	NSString *dataString = [[NSString alloc] initWithBytes:data length:len encoding:NSUTF8StringEncoding];
+	
+	NSDictionary *dataDict = [dataString JSONValue];
+	
+	[dataString release];
+	return dataDict;
+}
+

@@ -209,7 +209,15 @@
 
 	MLLog(LOG_DEBUG, "Got %llu bytes from %@", len, stream);
 	MLLogHexdump(LOG_DEBUG, MLStreamData(stream), len);
-
+	
+	NSDictionary *responseDict = MLStreamReadJSON(stream);
+	NSString *resultString = [responseDict objectForKey:kStorageResponse];
+	
+	if (resultString)
+		printf("%s\n", [resultString UTF8String]);
+	else
+		printf("Internal error.\n");
+	
 	[self stop];
 }
 

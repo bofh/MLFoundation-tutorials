@@ -118,10 +118,7 @@
 	MLLog(LOG_DEBUG, "Got %llu bytes from %@", len, stream);
 	MLLogHexdump(LOG_DEBUG, MLStreamData(stream), len);
 	
-	uint8_t *request = MLStreamData(stream);
-	NSString *requestString = [[NSString alloc] initWithBytes:request length:len encoding:NSUTF8StringEncoding];
-	NSDictionary *requestDict = [requestString JSONValue];
-	[requestString release]; requestString = nil;
+	NSDictionary *requestDict = MLStreamReadJSON(stream);
 	
 	NSString *responseString = nil;
 	NSString *keyString = [requestDict objectForKey:kStorageCommandGet];
