@@ -1,8 +1,10 @@
 #import "Tutorial5Application.h"
 #import "KeyValueStorage/StorageCommands.h"
+#import "Tools.h"
 
 @interface Tutorial5Application(private)
 - (void)dropStream:(id)stream;
+- (NSString *)commandResponse:(NSString *)response error:(NSError **)error;
 @end
 
 @implementation Tutorial5Application
@@ -121,11 +123,12 @@
 	NSDictionary *requestDict = [requestString JSONValue];
 	[requestString release]; requestString = nil;
 	
-	NSString *responseString = kStorageResponseUnknown;
+	NSString *responseString = nil;
 	NSString *keyString = [requestDict objectForKey:kStorageCommandGet];
 	if (keyString)
 	{
-		MLLog(LOG_DEBUG, "Get (%@) command", keyString);
+		MLLog(LOG_DEBUG, "Handle <get> command. <key> = (%@)", keyString);
+		responseString = [dataProvider_ objectForKey:keyString];
 	}
 	else
 	{
@@ -135,27 +138,37 @@
 			NSArray *keysArray = [setDict allKeys];
 			keyString = [keysArray objectAtIndex:0];
 			NSString *valString = [setDict objectForKey: keyString];
-			MLLog(LOG_DEBUG, "Set command (%@) = (%@)", keyString, valString);
+			MLLog(LOG_DEBUG, "Handle <set> command. <key> = (%@), <val> = (%@)", keyString, valString);
+			
+			[dataProvider_ setObject:valString forKey:keyString];
+			responseString = valString;
 		}
 	}
-		
-	MLStreamAppendBytes(stream, MLStreamData(stream), len);
-
-	if (len > 0)
-		MLStreamDrain(stream, len);
 	
+	if (responseString == nil)
+		responseString = kStorageResponseUnknown;
+	
+	NSError *error = nil;
+	NSString *jsonResponseString = [self commandResponse:responseString error:&error];
+	
+	MLStreamDrain(stream, len);
+	
+	if (error)
+		MLLog(LOG_DEBUG, "Internal JSON error");
+	
+	else
+		MLStreamAppendNSString(stream, jsonResponseString);
+		
 	[self dropStream:stream];
 }
 
-- (void)error:(NSError *)details
-	  onEvent:(id<MLBufferedEvent>)stream
+- (void)error:(NSError *)details onEvent:(id<MLBufferedEvent>)stream
 {
 	MLLog(LOG_DEBUG, "Stream %@ error (%@), closing connection", stream, details);
 	[self dropStream:stream];
 }
 
-- (void)timeout:(int)what
-		onEvent:(id <MLBufferedEvent>)stream
+- (void)timeout:(int)what onEvent:(id <MLBufferedEvent>)stream
 {
 	MLLog(LOG_DEBUG, "timeout: %@", stream);
 	[self dropStream:stream];
@@ -171,6 +184,19 @@
 	[sessions_ removeObject:stream];
 	[stream stop];
 	[stream flushAndRelease];	
+}
+
+- (NSString *)commandResponse:(NSString *)response error:(NSError **)error
+{
+	NSDictionary *dict = [NSDictionary
+		dictionaryWithObjects:[NSArray arrayWithObjects:response, nil]
+		forKeys:[NSArray arrayWithObjects:kStorageResponse, nil]];
+	
+	SBJSON *json = [[SBJSON alloc] init];
+	NSString *result = [json stringWithObject:dict error:error];
+	
+	[json release];
+	return result;
 }
 
 @end

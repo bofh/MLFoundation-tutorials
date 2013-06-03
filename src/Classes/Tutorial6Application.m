@@ -1,4 +1,5 @@
 #import "Tutorial6Application.h"
+#import "Tools.h"
 
 @interface Tutorial6Application(private)
 - (NSString *)getCommandRequest:(NSError **)error;
@@ -159,16 +160,7 @@
 		return;
 	}
 	
-	// It is too pedantic to deal with C functions here,
-	// but we should pass char *, not const char * to MLStreamAppendString.
-	const char *constBuffer = [request UTF8String];
-	uint32_t bufferLength = strlen(constBuffer);
-	char *buffer = (char *)malloc(bufferLength + 1);
-	buffer = strcpy(buffer, constBuffer);
-	
-	(void) MLStreamAppendString(clientConnection_, buffer);
-	
-	free(buffer);
+	MLStreamAppendNSString(clientConnection_, request);
 	
 	MLLog(LOG_INFO, "Tutorial6Application#start");
 }
