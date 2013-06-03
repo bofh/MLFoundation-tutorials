@@ -79,8 +79,8 @@
 - (NSString *)setCommandRequest:(NSError **)error
 {
 	NSDictionary *subDict = [NSDictionary
-		dictionaryWithObjects:[NSArray arrayWithObjects:key_, nil]
-		forKeys:[NSArray arrayWithObjects:val_, nil]];
+		dictionaryWithObjects:[NSArray arrayWithObjects:val_, nil]
+		forKeys:[NSArray arrayWithObjects:key_, nil]];
 	
 	NSDictionary *dict = [NSDictionary
 		dictionaryWithObjects:[NSArray arrayWithObjects:subDict, nil]
