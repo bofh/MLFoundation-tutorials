@@ -10,6 +10,8 @@
 
 - (id)init
 {
+	MLTrace;
+	
 	self = [super init];
 
 	if (self) {
@@ -29,6 +31,9 @@
 
 - (void)dealloc
 {
+	MLTrace;
+	MLAssert(clientConnection_);
+	
 	[clientConnection_ release];
 	[super dealloc];
 }
@@ -36,13 +41,17 @@
 // Tutorial6Application
 - (void)setHost:(NSString *)host
 {
+	MLTrace;
 	MLAssert(clientConnection_);
+	
 	[clientConnection_ setHost:host];
 }
 
 - (void)setPort:(int)port
 {
+	MLTrace;
 	MLAssert(clientConnection_);
+	
 	[clientConnection_ setPort:port];
 }
 
@@ -96,6 +105,7 @@
 // MLActivity
 - (BOOL)validateForStart:(NSError **)e
 {
+	MLTrace;
 	MLAssert(clientConnection_);
 	
 	if (![super validateForStart:e]) return NO;
@@ -111,7 +121,7 @@
 		{
 			*e = [NSError errorWithDomain:MLFoundationErrorDomain
 				code:MLApplicationStartError
-				localizedDescriptionFormat:@"Did you forget to pass <val>?"];
+				localizedDescriptionFormat:@"Did you forget to pass --val?"];
 			return NO;
 		}
 		break;
@@ -119,7 +129,7 @@
 	case kCommandUnknown:
 		*e = [NSError errorWithDomain:MLFoundationErrorDomain
 			code:MLApplicationStartError
-			localizedDescriptionFormat:@"You should use <get> or <set> command."];
+			localizedDescriptionFormat:@"You should use --get or --set command."];
 		return NO;
 	}
 	
@@ -128,6 +138,7 @@
 
 - (void)start
 {
+	MLTrace;
 	MLAssert(clientConnection_);
 	MLAssert(commandType_ != kCommandUnknown);
 	
@@ -135,7 +146,6 @@
 	[super start];
 	[clientConnection_ start];
 	
-	// Build the request.
 	NSError *error = nil;
 	NSString *request = nil;
 	
@@ -155,25 +165,22 @@
 	
 	if (error)
 	{
-		MLLog(LOG_WARNING, "Internal JSON error.");
+		MLLog(LOG_DEBUG, "Internal JSON error (%@)", &error);
 		[self stop];
 		return;
 	}
 	
 	MLStreamAppendNSString(clientConnection_, request);
-	
-	MLLog(LOG_INFO, "Tutorial6Application#start");
 }
 
 - (void)stop
 {
+	MLTrace;
 	MLAssert(clientConnection_);
 	
 	if (![self isStarted]) return;
 	[clientConnection_ stop];
 	[super stop];
-	
-	MLLog(LOG_INFO, "Tutorial6Application#stop");
 }
 
 - (BOOL)isStarted
@@ -201,13 +208,13 @@
 // MLBufferedEventDelegate
 - (void)dataAvailableOnEvent:(id<MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "dataAvailableOnEvent: %@", stream);
+	MLLog(LOG_DEBUG, "Data available on stream (%@)", stream);
 
 	uint64_t len = MLStreamLength(stream);
 	if (len < 1)
 		return;
 
-	MLLog(LOG_DEBUG, "Got %llu bytes from %@", len, stream);
+	MLLog(LOG_DEBUG, "Got (%llu) bytes from stream (%@)", len, stream);
 	MLLogHexdump(LOG_DEBUG, MLStreamData(stream), len);
 	
 	NSDictionary *responseDict = MLStreamReadJSON(stream);
@@ -223,19 +230,19 @@
 
 - (void)error:(NSError *)details onEvent:(id<MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "Stream %@ error (%@), closing connection", stream, details);
+	MLLog(LOG_DEBUG, "Stream (%@) error (%@), closing connection", stream, details);
 	[self stop];
 }
 
 - (void)timeout:(int)what onEvent:(id <MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "timeout: %@", stream);
+	MLLog(LOG_DEBUG, "Timeout on stream (%@)", stream);
 	[self stop];
 }
 
 - (void)writtenToEvent:(id<MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "writtenToEvent: %@", stream);
+	MLLog(LOG_DEBUG, "Written to stream (%@)", stream);
 }
 
 @end

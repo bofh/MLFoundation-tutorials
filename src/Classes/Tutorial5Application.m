@@ -11,6 +11,8 @@
 
 - (id)init
 {
+	MLTrace;
+	
 	self = [super init];
 
 	if (self) {
@@ -32,6 +34,10 @@
 
 - (void)dealloc
 {
+	MLTrace;
+	MLAssert(acceptor_);
+	MLAssert(sessions_);
+	
 	[dataProvider_ release];
 	[acceptor_ release];
 	[sessions_ release];
@@ -52,11 +58,17 @@
 
 - (void)setPort:(int)port
 {
+	MLTrace;
+	MLAssert(acceptor_);
+	
 	[acceptor_ setPort:port];
 }
 
 - (BOOL)validateForStart:(NSError **)e
 {
+	MLTrace;
+	MLAssert(acceptor_);
+	
 	if (![super validateForStart:e]) return NO;
 	if (![acceptor_ validateForStart:e]) return NO;
 	return YES;
@@ -64,58 +76,56 @@
 
 - (void)start
 {
+	MLTrace;
+	MLAssert(acceptor_);
+	
 	if ([self isStarted]) return;
 	[super start];
 	[acceptor_ start];
-	/*
-	[dataProvider_ setObject:@"Test message" forKey:@"TestKey"];
-	NSString *obj = [dataProvider_ objectForKey: @"TestKey"];
-	if (obj)
-		MLLog(LOG_INFO, [obj UTF8String]);
-	
-	*/
-	MLLog(LOG_INFO, "Tutorial5Application#start");
 }
 
 - (void)stop
 {
+	MLTrace;
+	MLAssert(acceptor_);
+	MLAssert(sessions_);
+	
 	if (![self isStarted]) return;
 	[super stop];
 	[acceptor_ stop];
 	[sessions_ makeObjectsPerformSelector:@selector(stop)];
-	MLLog(LOG_INFO, "Tutorial5Application#stop");
 }
 
 // MLAcceptor
 - (void)acceptor:(id<MLAcceptor>)acceptor receivedConnection:(id<MLBufferedEvent>)connection
 {
-	MLLog(LOG_INFO, "Client from %@ connected", connection);
+	MLAssert(sessions_);
+	MLLog(LOG_DEBUG, "Client from (%@) connected", connection);
 
 	[sessions_ addObject:connection];
 	[connection retain];
 
 	[connection setDelegate:self];
-
 	[connection setReadTimeout:5.0];
 	[connection start];
 }
 
 - (void)acceptor:(id<MLAcceptor>)acceptor error:(NSError *)details
 {
-	MLLog(LOG_ERROR, "Acceptor fatal error (%@), exiting...", details);
+	MLLog(LOG_DEBUG, "Acceptor fatal error (%@), existing...", details);
 	[self stop];
 }
 
 // MLBufferedEvent
 - (void)dataAvailableOnEvent:(id<MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "dataAvailableOnEvent: %@", stream);
-
+	MLLog(LOG_DEBUG, "Data available on stream (%@)", stream);
+	
 	uint64_t len = MLStreamLength(stream);
 	if (len < 1)
 		return;
-
-	MLLog(LOG_DEBUG, "Got %llu bytes from %@", len, stream);
+	
+	MLLog(LOG_DEBUG, "Got (%llu) bytes from stream (%@)", len, stream);
 	MLLogHexdump(LOG_DEBUG, MLStreamData(stream), len);
 	
 	NSDictionary *requestDict = MLStreamReadJSON(stream);
@@ -124,7 +134,7 @@
 	NSString *keyString = [requestDict objectForKey:kStorageCommandGet];
 	if (keyString)
 	{
-		MLLog(LOG_DEBUG, "Handle <get> command. <key> = (%@)", keyString);
+		MLLog(LOG_DEBUG, "Handle get command with key (%@)", keyString);
 		responseString = [dataProvider_ objectForKey:keyString];
 	}
 	else
@@ -135,7 +145,7 @@
 			NSArray *keysArray = [setDict allKeys];
 			keyString = [keysArray objectAtIndex:0];
 			NSString *valString = [setDict objectForKey: keyString];
-			MLLog(LOG_DEBUG, "Handle <set> command. <key> = (%@), <val> = (%@)", keyString, valString);
+			MLLog(LOG_DEBUG, "Handle set command with key (%@) and value (%@)", keyString, valString);
 			
 			[dataProvider_ setObject:valString forKey:keyString];
 			responseString = valString;
@@ -151,7 +161,7 @@
 	MLStreamDrain(stream, len);
 	
 	if (error)
-		MLLog(LOG_DEBUG, "Internal JSON error");
+		MLLog(LOG_DEBUG, "Internal JSON error (%@)", &error);
 	
 	else
 		MLStreamAppendNSString(stream, jsonResponseString);
@@ -161,23 +171,26 @@
 
 - (void)error:(NSError *)details onEvent:(id<MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "Stream %@ error (%@), closing connection", stream, details);
+	MLLog(LOG_DEBUG, "Stream (%@) error (%@), closing connection", stream, details);
 	[self dropStream:stream];
 }
 
 - (void)timeout:(int)what onEvent:(id <MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "timeout: %@", stream);
+	MLLog(LOG_DEBUG, "Timeout on stream (%@)", stream);
 	[self dropStream:stream];
 }
 
 - (void)writtenToEvent:(id<MLBufferedEvent>)stream
 {
-	MLLog(LOG_DEBUG, "writtenToEvent: %@", stream);
+	MLLog(LOG_DEBUG, "Written to stream (%@)", stream);
 }
 
 - (void)dropStream:(id)stream
 {
+	MLTrace;
+	MLAssert(sessions_);
+	
 	[sessions_ removeObject:stream];
 	[stream stop];
 	[stream flushAndRelease];	
