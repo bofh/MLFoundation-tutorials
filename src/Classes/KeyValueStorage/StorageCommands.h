@@ -1,2 +1,10 @@
-NSString * const kStorageCommandGet = @"get";
-NSString * const kStorageCommandSet = @"set";
+@class NSString;
+
+// Request
+extern NSString * const kStorageCommandGet;
+extern NSString * const kStorageCommandSet;
+
+// Response
+extern NSString * const kStorageResponse;
+extern NSString * const kStorageResponseUnknown;
+

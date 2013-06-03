@@ -1,7 +1,6 @@
 #import "Tutorial6Application.h"
-#import "KeyValueStorage/StorageCommands.h"
 
-@interface Tutorial6Application (private)
+@interface Tutorial6Application(private)
 - (NSString *)getCommandRequest:(NSError **)error;
 - (NSString *)setCommandRequest:(NSError **)error;
 @end
