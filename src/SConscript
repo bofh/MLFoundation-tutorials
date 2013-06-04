@@ -10,3 +10,12 @@ env.FoundationProgram('tutorial1', ['tutorial1.m'])
 env.FoundationProgram('tutorial2', ['tutorial2.m', 'Classes/Tutorial2Application.m'])
 env.FoundationProgram('tutorial3', ['tutorial3.m', 'Classes/Tutorial3Application.m'])
 env.FoundationProgram('tutorial4', ['tutorial4.m', 'Classes/Tutorial4Application.m'])
+env.FoundationProgram('tutorial5', ['tutorial5.m', 'Classes/Tutorial5Application.m',
+	'Classes/KeyValueStorage/KeyValueServer.m',
+	'Classes/KeyValueStorage/StorageCommands.m',
+	'Classes/Tools.m'])
+
+env.FoundationProgram('tutorial6', ['tutorial6.m', 'Classes/Tutorial6Application.m',
+	'Classes/KeyValueStorage/StorageCommands.m',
+	'Classes/Tools.m'])
+

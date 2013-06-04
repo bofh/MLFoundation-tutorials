@@ -6,3 +6,6 @@ doc
 .sconsign.dblite
 config.log
 .DS_Store
+*~
+*.swp
+*.swo
